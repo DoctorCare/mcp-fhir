@@ -1,4 +1,4 @@
-# @flexpa/mpc-fhir
+# @flexpa/mcp-fhir
 
 > [!WARNING]
 > This is an experimental demo not intended for production use.
@@ -61,7 +61,7 @@ On Windows: `%APPDATA%/Claude/claude_desktop_config.json`
 {
   "mcpServers": {
     "fhir": {
-      "command": "/path/to/@flexpa/mpc-fhir/build/index.js"
+      "command": "/path/to/@flexpa/mcp-fhir/build/index.js"
     },
     "env": {
       "FHIR_BASE_URL": "<FHIR_BASE_URL>",
