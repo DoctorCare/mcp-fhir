@@ -1,5 +1,8 @@
 #!/usr/bin/env node
 
+import { config as dotenvConfig } from 'dotenv';
+dotenvConfig();
+
 /**
  * This is a FHIR MCP server implementation that provides access to FHIR resources.
  * It supports:
@@ -62,7 +65,29 @@ const server = new Server(
   {
     capabilities: {
       resources: {},
-      tools: {},
+      tools: {
+        update_fhir: {
+          name: "update_fhir",
+          description: "Update a FHIR resource",
+          parameters: {
+            resourceType: {
+              type: "string",
+              description: "The type of FHIR resource to update (e.g. Patient, Observation)"
+            },
+            id: {
+              type: "string",
+              description: "The ID of the resource to update"
+            },
+            resource: {
+              type: "object",
+              description: "The updated resource data"
+            }
+          },
+          returns: {
+            type: "object",
+            description: "The updated FHIR resource"
+          }
+        },
     },
   }
 );
@@ -163,6 +188,28 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
  */
 server.setRequestHandler(CallToolRequestSchema, async (request: CallToolRequest): Promise<CallToolResult> => {
   switch (request.params.name) {
+  case "update_fhir": {
+    const resourceType = String(request.params.arguments?.resourceType);
+    const id = String(request.params.arguments?.id);
+    const resource = request.params.arguments?.resource;
+
+    if (!resource) {
+      throw new Error('Resource data is required for update');
+    }
+
+    try {
+      const response = await fhirClient.put(`/${resourceType}/${id}`, resource);
+      
+      return {
+        content: [{
+          type: "text",
+          text: JSON.stringify(response.data, null, 2)
+        }]
+      };
+    } catch (error: any) {
+      throw new Error(`Failed to update FHIR resource: ${error.message}`);
+    }
+  }
     case "search_fhir": {
       const resourceType = String(request.params.arguments?.resourceType);
       const searchParams = request.params.arguments?.searchParams || {};
