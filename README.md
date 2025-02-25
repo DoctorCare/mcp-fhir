@@ -19,6 +19,13 @@ This is a TypeScript-based MCP server that connects to a FHIR server. It provide
 - Resources are returned in FHIR JSON format
 - Supports all FHIR Resource types available in the FHIR server's CapabilityStatement
 
+### Appointment Management
+
+- Find available appointment slots based on practitioner availability and constraints
+- Schedule new appointments with required patient, practitioner, and timing information
+- Support for different appointment types and durations
+- Integration with FHIR Schedule and Appointment resources
+
 ### Tools
 - `search_fhir` - Search FHIR resources
   - Takes `resourceType` and `searchParams` as parameters
@@ -26,6 +33,15 @@ This is a TypeScript-based MCP server that connects to a FHIR server. It provide
 - `read_fhir` - Read an individual FHIR resource
   - Takes `uri` as a parameter
   - Returns the FHIR resource in JSON format
+- `find_available_slots` - Find available appointment slots
+  - Takes `practitionerId`, `appointmentType`, `duration`, `startDate`, and `endDate` as parameters
+  - Returns list of available time slots
+- `schedule_appointment` - Schedule a new appointment
+  - Takes `patientId`, `practitionerId`, `appointmentType`, `startTime`, `endTime`, and optional `notes`
+  - Returns the created FHIR Appointment resource
+- `update_fhir` - Update a FHIR resource
+  - Takes `uri` and `resource` as parameters
+  - Returns the updated FHIR resource
 
 ## Configuration
 
