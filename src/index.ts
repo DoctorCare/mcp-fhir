@@ -87,8 +87,9 @@ const server = new Server(
             type: "object",
             description: "The updated FHIR resource"
           }
-        },
-    },
+        }
+      }
+    }
   }
 );
 
