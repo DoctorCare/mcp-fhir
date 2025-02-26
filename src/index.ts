@@ -281,6 +281,37 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         }
       },
       {
+        name: "cancel_appointments_by_date",
+        description: "Cancel all appointments for a specified date",
+        inputSchema: {
+          type: "object",
+          properties: {
+            date: {
+              type: "string",
+              description: "The date to cancel appointments for (YYYY-MM-DD format)"
+            },
+            reason: {
+              type: "string",
+              description: "Reason for cancellation"
+            }
+          },
+          required: ["date"],
+          additionalProperties: false
+        },
+        outputSchema: {
+          type: "object",
+          properties: {
+            canceledAppointments: {
+              type: "array",
+              items: {
+                type: "string"
+              },
+              description: "List of canceled appointment IDs"
+            }
+          }
+        }
+      },
+      {
         name: "update_fhir",
         description: "Update a FHIR resource",
         inputSchema: {
@@ -436,6 +467,56 @@ server.setRequestHandler(CallToolRequestSchema, async (request: CallToolRequest)
         };
       } catch (error: any) {
         throw new Error(`Failed to schedule appointment: ${error.message}`);
+      }
+    }
+
+    case "cancel_appointments_by_date": {
+      const { date, reason } = request.params.arguments || {};
+
+      try {
+        // Convert date to start and end of day in ISO format
+        const startDate = new Date(`${date}T00:00:00`);
+        const endDate = new Date(`${date}T23:59:59`);
+        
+        // Search for appointments on the specified date
+        const response = await fhirClient.get('/Appointment', {
+          params: {
+            date: `ge${startDate.toISOString()}&le${endDate.toISOString()}`
+          }
+        });
+
+        const canceledAppointments: string[] = [];
+
+        if (response.data.entry) {
+          for (const entry of response.data.entry) {
+            const appointment = entry.resource;
+            
+            // Create cancellation resource maintaining required fields from original
+            const cancelResource = {
+              ...appointment,
+              status: "cancelled"
+            };
+            
+            if (reason) {
+              cancelResource.cancelationReason = {
+                text: reason
+              };
+            }
+
+            // Update the appointment in FHIR
+            await fhirClient.put(`/Appointment/${appointment.id}`, cancelResource);
+            canceledAppointments.push(appointment.id);
+          }
+        }
+
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify({ canceledAppointments }, null, 2)
+          }]
+        };
+      } catch (error: any) {
+        throw new Error(`Failed to cancel appointments: ${error.message}`);
       }
     }
 

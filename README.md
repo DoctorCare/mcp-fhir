@@ -39,6 +39,9 @@ This is a TypeScript-based MCP server that connects to a FHIR server. It provide
 - `schedule_appointment` - Schedule a new appointment
   - Takes `patientId`, `practitionerId`, `appointmentType`, `startTime`, `endTime`, and optional `notes`
   - Returns the created FHIR Appointment resource
+- `cancel_appointments_by_date` - Cancel all appointments for a specified date
+  - Takes `date` (YYYY-MM-DD format) and optional `reason` for cancellation
+  - Returns a list of canceled appointment IDs
 - `update_fhir` - Update a FHIR resource
   - Takes `uri` and `resource` as parameters
   - Returns the updated FHIR resource
